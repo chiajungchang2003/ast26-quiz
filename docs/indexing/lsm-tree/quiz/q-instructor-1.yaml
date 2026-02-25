@@ -1,33 +1,29 @@
 author: instructor
 date: 2026-02-23
 question: |
-  An LSM-tree has a size ratio $T = 10$ between consecutive levels.
-  Level 0 (the in-memory buffer) is 64 MB, and data is compacted using
-  **leveled compaction**. In the worst case, what is the **write
-  amplification** for a single key-value pair that is initially written
-  to the memtable and eventually reaches Level 3?
+  一棵 LSM-tree 的相鄰層級大小比 (size ratio) 為 $T = 10$。
+  Level 0 (記憶體內緩衝區) 為 64 MB, 並使用**分層壓縮 (leveled
+  compaction)**。在最壞情況下, 一筆最初寫入記憶體表 (memtable)
+  並最終到達 Level 3 的鍵值對 (key-value pair), 其**寫入放大
+  (write amplification)** 是多少?
 options:
   - text: "$T \\times L = 10 \\times 3 = 30$"
     correct: true
     explanation: |
-      In leveled compaction, merging into level $i$ can rewrite up to
-      $T$ times the data (since level $i$ is $T$ times larger than
-      level $i-1$). Over $L = 3$ levels the worst-case write
-      amplification is $T \\times L = 10 \\times 3 = 30$.
+      在分層壓縮中, 合併到第 $i$ 層最多可重寫 $T$ 倍的資料
+      (因為第 $i$ 層是第 $i-1$ 層的 $T$ 倍大)。經過 $L = 3$
+      層, 最壞情況的寫入放大為 $T \times L = 10 \times 3 = 30$。
   - text: "$T^L = 10^3 = 1000$"
     explanation: |
-      This confuses the *size ratio* with the *write amplification*.
-      $T^L$ gives the capacity of level $L$ relative to level 0, not
-      the total rewrites a key experiences. Write amplification is
-      additive across levels, not multiplicative.
+      這裡混淆了*大小比*與*寫入放大*。$T^L$ 是第 $L$ 層相對於
+      第 0 層的容量, 而非一筆鍵值經歷的總重寫次數。寫入放大在
+      各層間是累加的, 不是相乘的。
   - text: "$L = 3$"
     explanation: |
-      This would be the write amplification if each compaction rewrote
-      data exactly once with no overlap — i.e., tiered compaction with
-      a size ratio of 1. Leveled compaction rewrites up to $T$ times
-      per level.
+      這會是在每次壓縮僅重寫一次且無重疊的情況下的寫入放大 —
+      也就是大小比為 1 的分級壓縮 (tiered compaction)。分層壓縮
+      每層最多重寫 $T$ 次。
   - text: "$T + L = 10 + 3 = 13$"
     explanation: |
-      There is no standard formula that adds $T$ and $L$. The correct
-      model multiplies per-level cost ($T$) by the number of levels
-      ($L$).
+      沒有任何標準公式是將 $T$ 與 $L$ 相加。正確的模型是將每層
+      成本 ($T$) 乘以層數 ($L$)。

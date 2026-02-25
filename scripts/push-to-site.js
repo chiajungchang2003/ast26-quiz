@@ -174,7 +174,70 @@ async function main() {
   const failures = [];
 
   for (const line of lines) {
-    const [status, filePath] = line.split('\t');
+    const parts = line.split('\t');
+    const status = parts[0];
+
+    // Handle renames: R<score>\t<old-path>\t<new-path>
+    // Delete old record and upsert new one
+    if (status.startsWith('R')) {
+      const oldPath = parts[1];
+      const newPath = parts[2];
+      const oldInfo = parseQuizPath(oldPath);
+      const newInfo = parseQuizPath(newPath);
+
+      // Delete old record if path changed pillar/concept
+      if (oldInfo && newInfo &&
+          (oldInfo.pillar !== newInfo.pillar || oldInfo.concept !== newInfo.concept)) {
+        const delPayload = {
+          pillar: oldInfo.pillar,
+          concept: oldInfo.concept,
+          filename: oldInfo.filename,
+        };
+        const delResult = await requestWithRetry('DELETE', '/api/quiz', delPayload);
+        if (delResult.success) {
+          console.log(`\u2705 ${oldInfo.filename} \u2192 deleted old record (${oldInfo.pillar}/${oldInfo.concept})`);
+        } else {
+          console.log(`\u26A0\uFE0F ${oldInfo.filename} \u2192 old record delete failed (${delResult.error}), continuing with upsert`);
+        }
+      }
+
+      // Upsert at new path
+      if (!newInfo) {
+        console.log(`\u26A0\uFE0F Skipping unrecognized rename target: ${newPath}`);
+        continue;
+      }
+
+      let data;
+      try {
+        const content = fs.readFileSync(newPath, 'utf8');
+        data = yaml.load(content);
+      } catch (err) {
+        console.log(`\u274C ${newInfo.filename} \u2192 FAILED (parse error: ${err.message})`);
+        failures.push({ file: newPath, error: `Parse error: ${err.message}` });
+        continue;
+      }
+
+      const payload = {
+        pillar: newInfo.pillar,
+        concept: newInfo.concept,
+        filename: newInfo.filename,
+        author: data.author,
+        date: data.date instanceof Date ? data.date.toISOString().split('T')[0] : data.date,
+        question: data.question,
+        options: data.options,
+      };
+
+      const result = await requestWithRetry('POST', '/api/quiz', payload);
+      if (result.success) {
+        console.log(`\u2705 ${newInfo.filename} \u2192 upserted (renamed from ${oldInfo?.pillar}/${oldInfo?.concept})`);
+      } else {
+        console.log(`\u274C ${newInfo.filename} \u2192 FAILED (${result.error})`);
+        failures.push({ file: newPath, error: result.error });
+      }
+      continue;
+    }
+
+    const filePath = parts[1];
     const info = parseQuizPath(filePath);
     if (!info) {
       console.log(`\u26A0\uFE0F Skipping unrecognized path: ${filePath}`);
