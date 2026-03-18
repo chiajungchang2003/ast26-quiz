@@ -10,7 +10,7 @@ options:
     correct: true
     explanation: |
       通常 io_uring 的 SQ/CQ 是共享，User 可以一次寫入多個 SQE，然後只花費一個 syscall。
-  - text: "在 io_uring 中，CQE 資料結構通常為 64 bytes，因為CQE 需要儲存大量回傳的資料。"
+  - text: "在 io_uring 中，CQE 資料結構通常為 64 bytes，因為 CQE 需要儲存大量回傳的資料。"
     explanation: |
       通常 SQE 的資料結構通常為 64 bytes，儲存操作指令等，而 CQE 的資料結構通常為 16 bytes，僅儲存狀態等資訊。
   - text: "在 io_uring 的 Direct I/O 中，仍然需要將資料複製到 Kernel 空間，以保證安全性。"
