@@ -1,5 +1,5 @@
 author: david20041024
-date: 2026-03-16
+date: 2026-03-18
 question: |
   在 SSD 管理中，垃圾回收 (GC) 需要權衡有效空間回收 (Utilization)、資料更新與損耗平衡 (Wear Leveling)。
   我們定義一個選擇回收區塊 (Victim) 的公式：
