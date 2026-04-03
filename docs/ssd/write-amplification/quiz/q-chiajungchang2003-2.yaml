@@ -1,0 +1,18 @@
+author: Expert-Bot
+date: 2026-04-03
+question: |
+  在 WATT 替換演算法中，引入 **Epochs** 機制的核心作用為何？
+options:
+  - text: "防止熱頁面在每次存取時都修改元數據，進而減少多核心 CPU 下的 cache line ping pong 並提升擴展性。"
+    correct: true
+    explanation: |
+      如果每次存取熱頁面（如 B-tree 根節點）都更新時間戳，會導致緩存行在不同 CPU 核心間頻繁搬移 (Contention hotspot)。透過 Epochs，WATT 僅在全局時間增加時才寫入新時間戳，有效降低了寫入競爭。
+  - text: "Epochs 提供了一種無鎖版本控制 (MVCC)，讓讀取操作不需要加鎖即可獲取歷史頁面。"
+    explanation: |
+      WATT 是緩衝池替換算法，並非資料庫的並發控制 (MVCC) 系統。Epochs 在此處是用於存取頻率追蹤的優化。
+  - text: "利用 Epochs 確保 WAL 刷新頻率與 SSD 的垃圾回收週期同步。"
+    explanation: |
+      Epochs 的增加與頁面替換數量（例如每替換 10% 緩衝池頁面）掛鉤，與 SSD 內部的物理週期或 WAL 無關。
+  - text: "當一個 Epoch 結束時，強制將所有髒頁刷新至 SSD 以重置寫入權重。"
+    explanation: |
+      這是錯誤的。Epoch 僅用於時間戳管理，髒頁的寫入是由寫入權重參數與背景回收執行緒根據頁面評分決定的，而非由 Epoch 強制執行。
