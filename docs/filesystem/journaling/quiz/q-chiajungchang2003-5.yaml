@@ -1,0 +1,18 @@
+author: chiajungchang2003
+date: 2026-05-29
+question: |
+  關於 rename（重新命名）操作在不同日誌模式下的表現，下列敘述何者正確？
+
+  - text: " 在 FastCommit 中，rename 產生的日誌量（192 bytes）比 append（168 bytes）稍多，因為它涉及目錄項的變動。"
+    correct: true
+    explanation: |
+      正確。 FastCommit 針對不同操作定義了精簡的標籤，其中單次 append 4 KB 的日誌量為 168 bytes，而 rename 一個檔案則為 192 bytes，兩者皆屬於極輕量級的邏輯紀錄，且 rename 確實因操作邏輯略微複雜而產生稍高的標籤開銷。
+  - text: "JBD2 處理 rename 時非常高效，因為它只需修改一個 bit，日誌寫入量小於 1 KB。"
+    explanation: |
+      錯誤。 JBD2 採用物理日誌（Physical journaling），其記錄單位是完整的 4 KB 區塊映像，即使只修改一個位元，也必須將整個 Inode 區塊、描述區塊與提交紀錄完整寫入，導致單次 rename 在 JBD2 下平均會產生高達 28 KB 的寫入量。
+  - text: "無論是 rename 還是 append，FastCommit 在 5 秒內的總寫入量計算都不需考慮 JBD2。"
+    explanation: |
+      錯誤。 FastCommit 採用的是**混合式（Hybrid）架構，雖然每個 fsync 僅觸發邏輯日誌（FCLog），但系統每 5 秒依然會強制執行一次 JBD2 的傳統物理提交（Slow commit）**來整理檔案系統的物理結構，因此在長時段的總量計算中，這項物理開銷必須被計入。
+  - text: "FastCommit 處理 rename 需要 28 KB，而 JBD2 僅需 192 bytes，因此 JBD2 較優。"
+    explanation: |
+      錯誤。 JBD2 需要 28 KB 而 FastCommit 僅需 192 bytes ， FastCommit 的設計初衷正是為了解決 JBD2 在頻繁 fsync 下因物理寫入過大（24~28 KB）而導致的效能瓶頸。
