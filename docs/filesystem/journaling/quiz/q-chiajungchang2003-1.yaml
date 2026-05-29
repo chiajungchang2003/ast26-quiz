@@ -1,7 +1,7 @@
 author: chiajungchang2003
 date: 2026-05-29
 question: |
-  根據下列對 Journaling 以及 Fast Commit 的描述，哪一項正確的？
+  根據下列對 Journaling 以及 Fast Commit 的描述，哪一項是正確的？
 
 options:
   - text: "FastCommit 透過邏輯標籤（Logical tags）有效解決了 JBD2 因粒度不匹配（Granularity Mismatch）導致的頻寬浪費，但由於邏輯日誌的恢復高度依賴檔案系統狀態，因此其 Recovery 程序被設計為先由 JBD2 重演物理影像以建立一致的基準點，再接續重演邏輯日誌以完成增量更新。"
