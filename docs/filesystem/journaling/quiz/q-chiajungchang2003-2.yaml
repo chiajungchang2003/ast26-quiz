@@ -7,7 +7,7 @@ options:
   - text: "在 FastCommit 的恢復流程中，系統會先重演最後一次 JBD2 的 Slow commit 以建立物理基礎，接著再依序重演之後累積的 FCLog 邏輯紀錄。"
     correct: true
     explanation: |
-      這是FastCommit 混合式日誌恢復流程的描述，首先必須先重演最後一次 JBD2 的 Slow commit 以確保硬碟恢復到一個確定的物理狀態（基準點），之後再依序重演之後累積的 FCLog 邏輯紀錄以完成增量更新。
+      這是 FastCommit 混合式日誌恢復流程的描述，首先必須先重演最後一次 JBD2 的 Slow commit 以確保硬碟恢復到一個確定的物理狀態（基準點），之後再依序重演之後累積的 FCLog 邏輯紀錄以完成增量更新。
   - text: "Logical journaling (如 FastCommit) 因為記錄的資料量極小，所以在發生系統崩潰後，其 Recovery 的速度與邏輯複雜度都優於 Physical journaling。"
     explanation: |
       雖然邏輯日誌寫入量小，但其 Recovery 極其複雜，因為重演（Replay）時必須重新執行高階操作，且結果依賴當時的檔案系統狀態。
