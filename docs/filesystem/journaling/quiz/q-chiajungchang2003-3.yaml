@@ -7,7 +7,7 @@ options:
   - text: "JBD2 由於採用物理日誌，即使修改量極小，平均每次提交仍需寫入約 6 個區塊（約 24 KB）。"
     correct: true
     explanation: |
-      正確。因為 JBD2 採用的物理日誌存在「粒度不匹配」（Granularity Mismatch）問題，即使僅修改 8 bytes，也必須完整寫入包含 Inode、描述及提交紀錄等區塊影像，導致平均每次提交產生約 24 KB 的日誌負擔。
+      正確。因為 JBD2 採用的物理日誌存在 Granularity Mismatch 問題，即使僅修改 8 bytes，也必須完整寫入包含 Inode、描述及提交紀錄等區塊影像，導致平均每次提交產生約 24 KB 的日誌負擔。
   - text: "JBD2 僅需記錄 inode 修改的 8 bytes 欄位，因此物理日誌寫入量遠小於 4 KB。"
     explanation: |
       錯誤。JBD2 屬於物理日誌，其記錄單位是完整的 Block image (4 KB)。即使修改量只有幾個 bytes，它依然會複製整個 4 KB 的區塊到日誌中，導致極大的寫入開銷。
