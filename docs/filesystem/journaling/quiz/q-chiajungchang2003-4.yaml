@@ -1,0 +1,19 @@
+author: chiajungchang2003
+date: 2026-05-29
+question: |
+  假設一個 workload 每秒執行 1000 次 append 4 KB 並呼叫 fsync()，總共執行 5 秒。請問 JBD2 與 FastCommit 每秒平均寫入日誌量的比例最接近下列何者？
+
+options:
+  - text: " 142 : 1"
+    correct: true
+    explanation: |
+       因為 Fastcommit 仍然保留每 5 秒做一次 slow commit 的機制，所以在這個 workload 下， JBD2 平均每秒寫入的 byte 量是 5000 次 append * 24KB / 5 = 24,000KB/s ，而 FastCommit 每秒寫入的 byte 量是 [168 bytes * 5000 次 append + 24KB * 1 (每五秒一次的 slow commit)] / 5 = 169KB/s，所以比例大約是 142 : 1。
+  - text: "149 : 1"
+    explanation: |
+      這是rename workload 沒有考慮到 FastCommit 每五秒一次的 JBD2 Slow commit 成本的比例。
+  - text: "146 : 1"
+    explanation: |
+      漏掉考慮每五秒一次的 JBD2 Slow commit 成本。
+  - text: "145 : 1"
+    explanation: |
+      這是 rename workload 的比例，與 append workload 不同。
