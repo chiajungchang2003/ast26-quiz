@@ -11,9 +11,9 @@ options:
   - text: "某個 folder 底下有 5000 個檔案，對這些檔案分別執行一次的 rename 後呼叫 fsync。在總執行時長 5 秒，每秒 1000 次的狀況下，使用 JBD2 與使用 FastCommit 每秒寫入量的比例是 **145 : 1**"
     explanation: |
       正確。因為 rename 會修改兩個 inode 的 metadata，所以每次 rename 都會產生 48KB 的 journal 寫入（24KB * 2），所以 JBD2 每秒寫入的 byte 量是 1000 次 rename * 48KB = 48,000KB/s，而 FastCommit 每秒寫入的 byte 量是 [168 bytes * 1000 次 rename + 24KB * 1 (每五秒一次的 slow commit)] / 5 = 4.8KB/s，所以比例大約是 145 : 1。
-  - text: "雖然 FastCommit 大幅縮減了 `fsync()` 產生的日誌寫入量，但為了確保資料的持久化（Persistence），系統在寫入 FCLog 的提交標記時依然必須執行昂貴的磁碟 Cache Flush 指令 。"
+  - text: "雖然 FastCommit 大幅縮減了 `fsync()` 產生的日誌寫入量，但為了確保資料的 Persistence ，系統在寫入 FCLog 的提交標記時依然必須執行昂貴的磁碟 Cache Flush 指令 。"
     explanation: |
       FastCommit 優化的是「頻寬浪費」（解決 Granularity Mismatch），但 `fsync` 要求的原子性邊界必須靠 Cache Flush 來保證資料離開揮發性快取。因此，FastCommit 並沒有、也無法跳過 Cache Flush 這個硬體層級的瓶頸。
-  - text: "FastCommit 的優化設計並未更動 ext4 的磁碟佈局（on-disk format）或 API 介面，這使得現有的 ext4 檔案系統在 Linux 核心升級後，無需重新格式化硬碟即可享有效能提升，實現了無痛升級。"
+  - text: "FastCommit 的優化設計並未更動 ext4 的 on-disk format 或 API 介面，這使得現有的 ext4 檔案系統在 Linux 核心升級後，無需重新格式化硬碟即可享有效能提升，實現了無痛升級。"
     explanation: |
       ext4 檔案系統的日誌機制核心在於透過預寫式日誌（WAL）與 Checkpoint 歸位來確保斷電後的資料一致性，而 FastCommit 則是一種混合式優化，它在保留 JBD2 穩定物理基礎的同時，針對頻繁同步（fsync）改用輕量級的邏輯標籤（FCLog），藉此解決 JBD2 即使只修改幾個 bytes 也需寫入 24 KB 物理映像所導致的「粒度不匹配」頻寬浪費問題，從而實現在不改動磁碟佈局（On-disk format）的前提下，大幅提升系統的寫入效率與恢復效能。
