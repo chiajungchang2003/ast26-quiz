@@ -3,6 +3,7 @@ date: 2026-05-29
 question: |
   關於 rename（重新命名）操作在不同日誌模式下的表現，下列敘述何者正確？
 
+options:
   - text: " 在 FastCommit 中，rename 產生的日誌量（192 bytes）比 append（168 bytes）稍多，因為它涉及目錄項的變動。"
     correct: true
     explanation: |
