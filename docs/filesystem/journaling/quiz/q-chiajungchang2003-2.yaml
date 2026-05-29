@@ -1,0 +1,19 @@
+author: chiajungchang2003
+date: 2026-05-29
+question: |
+  關於檔案系統一致性機制的細節，下列敘述何者正確？
+
+options:
+  - text: "在 FastCommit 的恢復流程中，系統會先重演最後一次 JBD2 的 Slow commit 以建立物理基礎，接著再依序重演之後累積的 FCLog 邏輯紀錄。"
+    correct: true
+    explanation: |
+      這是FastCommit 混合式日誌恢復流程的描述，首先必須先重演最後一次 JBD2 的 Slow commit 以確保硬碟恢復到一個確定的物理狀態（基準點），之後再依序重演之後累積的 FCLog 邏輯紀錄以完成增量更新。
+  - text: "Logical journaling (如 FastCommit) 因為記錄的資料量極小，所以在發生系統崩潰後，其 Recovery 的速度與邏輯複雜度都優於 Physical journaling。"
+    explanation: |
+      雖然邏輯日誌寫入量小，但其 Recovery 極其複雜，因為重演（Replay）時必須重新執行高階操作，且結果依賴當時的檔案系統狀態。
+  - text: "Ordered mode 雖然比 Writeback mode 安全，但其 WAF (寫入放大因子) 依然與 Data mode 相同，因為資料都必須在 Metadata 提交前先寫入硬碟。"
+    explanation: |
+      雖然資料要先寫，但 Ordered mode 的 Data 並未進入日誌區，所以資料只寫了一次（WAF 接近 1），而 Data mode 的資料要寫兩次（一次進日誌，一次進正式位置，WAF = 2）。
+  - text: "FastCommit 能夠大幅提升效能，其中一個關鍵是它透過每 5 秒一次的 Slow commit 來統整物理結構，這使得中間頻繁發生的 fsync 不再需要發送昂貴的 cache flush 指令。"
+    explanation: |
+      fsync 的昂貴來自於 commit granularity mismatch 以及 cache flush。即便用了 FastCommit，為了保證資料真的「落盤」到非揮發性記憶體，在寫入 FCLog 的 commit 標記（如 TAIL tag）時，依然需要 cache flush 來確保一致性 boundary。

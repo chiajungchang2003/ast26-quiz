@@ -11,7 +11,7 @@ options:
       。再來，邏輯日誌的缺點正是恢復複雜度高且依賴當下狀態。最後 FastCommit 的 Hybrid Recovery 流程：必須先靠 JBD2 的物理重演（Physical Replay）把硬碟恢復到一個確定的物理狀態（基準點），之後 FCLog 的邏輯重演才有意義。
   - text: "ext4 writeback mode 下無法保證 data 和 metadata 的寫入順序，但是斷電後仍然有辦法將尚未寫入正確位置的 data 透過 replay 的方式寫入正確位置"
     explanation: |
-      在 writeback mode下， data 本身是沒有被寫入 log 中的，所以當系統斷電後，這些 data 是無法透過 replay 的方式寫入正確位置的。
+      在 writeback mode 下， data 本身是沒有被寫入 log 中的，所以當系統斷電後，這些 data 是無法透過 replay 的方式寫入正確位置的。
   - text: "在 Ordered mode 下，因為資料（Data）已經直接寫入硬碟正式位置，所以 Checkpoint 動作僅是為了核對資料正確性，並非絕對必要。"
     explanation: |
       Checkpoint 並非選配的校對程序，而是將日誌中已提交 (Committed) 的 Metadata 內容，真正搬回硬碟正式位置的必要動作
