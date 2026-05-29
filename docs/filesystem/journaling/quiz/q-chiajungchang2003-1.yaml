@@ -1,0 +1,20 @@
+author: chiajungchang2003
+date: 2026-05-29
+question: |
+  根據下列對Journaling以及Fast Commit的描述，哪一項正確的？
+
+options:
+  - text: "FastCommit 透過邏輯標籤（Logical tags）有效解決了 JBD2 因粒度不匹配（Granularity Mismatch）導致的頻寬浪費，但由於邏輯日誌的恢復高度依賴檔案系統狀態，因此其 Recovery 程序被設計為先由 JBD2 重演物理影像以建立一致的基準點，再接續重演邏輯日誌以完成增量更新。"
+    correct: true
+    explanation: |
+      正確。FastCommit 解決的正是 JBD2 即使只改幾個 bytes 也要寫入 4 KB 區塊的「粒度不匹配」問題
+      。再來，邏輯日誌的缺點正是恢復複雜度高且依賴當下狀態。最後 FastCommit 的 Hybrid Recovery 流程：必須先靠 JBD2 的物理重演（Physical Replay）把硬碟恢復到一個確定的物理狀態（基準點），之後 FCLog 的邏輯重演才有意義。
+  - text: "ext4 writeback mode 下無法保證data 和 metadata的寫入順序，但是斷電後仍然有辦法將尚未寫入正確位置的data透過replay 的方式寫入正確位置"
+    explanation: |
+      在writeback mode下，data本身是沒有被寫入log中的，所以當系統斷電後，這些data是無法透過replay的方式寫入正確位置的。
+  - text: "在 Ordered mode 下，因為資料（Data）已經直接寫入硬碟正式位置，所以 Checkpoint 動作僅是為了核對資料正確性，並非絕對必要。"
+    explanation: |
+      Checkpoint 並非選配的校對程序，而是將日誌中已提交 (Committed) 的 Metadata 內容，真正搬回硬碟正式位置的必要動作
+  - text: "FastCommit 的效能提升主要來自於它完全取代了 JBD2，並將物理日誌（Physical journaling）改為邏輯日誌（Logical journaling）"
+    explanation: |
+      FastCommit 是一種 Hybrid journaling 方式，每5秒仍然會跑一次slow commit來確保資料安全性，所以它並沒有完全取代JBD2，而是與JBD2共存。
