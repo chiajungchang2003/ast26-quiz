@@ -10,7 +10,7 @@ options:
       這是 FastCommit 混合式日誌恢復流程的描述，首先必須先重演最後一次 JBD2 的 Slow commit 以確保硬碟恢復到一個確定的物理狀態（基準點），之後再依序重演之後累積的 FCLog 邏輯紀錄以完成增量更新。
   - text: "Logical journaling (如 FastCommit) 因為記錄的資料量極小，所以在發生系統崩潰後，其 Recovery 的速度與邏輯複雜度都優於 Physical journaling。"
     explanation: |
-      雖然邏輯日誌寫入量小，但其 Recovery 極其複雜，因為重演（Replay）時必須重新執行高階操作，且結果依賴當時的檔案系統狀態。
+      雖然邏輯日誌寫入量小，但其 Recovery 極其複雜，因為 Replay 時必須重新執行高階操作，且結果依賴當時的檔案系統狀態。
   - text: "Ordered mode 雖然比 Writeback mode 安全，但其 WAF (寫入放大因子) 依然與 Data mode 相同，因為資料都必須在 Metadata 提交前先寫入硬碟。"
     explanation: |
       雖然資料要先寫，但 Ordered mode 的 Data 並未進入日誌區，所以資料只寫了一次（WAF 接近 1），而 Data mode 的資料要寫兩次（一次進日誌，一次進正式位置，WAF = 2）。
