@@ -4,11 +4,10 @@ question: |
   根據下列對 Journaling 以及 Fast Commit 的描述，哪一項是正確的？
 
 options:
-  - text: "FastCommit 透過邏輯標籤（Logical tags）有效解決了 JBD2 因粒度不匹配（Granularity Mismatch）導致的頻寬浪費，但由於邏輯日誌的恢復高度依賴檔案系統狀態，因此其 Recovery 程序被設計為先由 JBD2 重演物理影像以建立一致的基準點，再接續重演邏輯日誌以完成增量更新。"
+  - text: "FastCommit 用 logical FCLog 解決了 JBD2 因 granularity mismatch（改 8 bytes 卻要寫 24 KB）造成的頻寬浪費。Recovery 時則先 replay 最近一次 JBD2 slow commit，再依序 replay 之後累積的 FCLog entries。"
     correct: true
     explanation: |
-      正確。FastCommit 解決的正是 JBD2 即使只改幾個 bytes 也要寫入 4 KB 區塊的「粒度不匹配」問題
-      。再來，邏輯日誌的缺點正是恢復複雜度高且依賴當下狀態。最後 FastCommit 的 Hybrid Recovery 流程：必須先靠 JBD2 的物理重演（Physical Replay）把硬碟恢復到一個確定的物理狀態（基準點），之後 FCLog 的邏輯重演才有意義。
+      正確。 FastCommit 透過記錄邏輯層級的檔案系統操作（FCLog）取代頻繁的 physical journaling，並定期以 JBD2 slow commit 建立 checkpoint，因此解決了 JBD2 因 granularity mismatch 所造成的頻寬浪費。復原時則先 replay 最近一次 JBD2 commit，再 replay 後續 FCLog entries 即可恢復最新狀態。
   - text: "ext4 writeback mode 下無法保證 data 和 metadata 的寫入順序，但是斷電後仍然有辦法將尚未寫入正確位置的 data 透過 replay 的方式寫入正確位置"
     explanation: |
       在 writeback mode 下， data 本身是沒有被寫入 log 中的，所以當系統斷電後，這些 data 是無法透過 replay 的方式寫入正確位置的。
